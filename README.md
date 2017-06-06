@@ -2,7 +2,12 @@
 
 It's a javascript library used to accurate calcurate, it only supports plus, minus, multiply and divide operation.
 
-### USE
+### Install
+```bash
+npm install acc-calc
+```
+
+### Use
 ```javascript
 const accCalc = require('acc-calc');
 
