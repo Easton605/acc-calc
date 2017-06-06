@@ -11,7 +11,7 @@ var getFloatLength = function(num) {
   return numAfterPoint ? numAfterPoint.length : 0;
 };
 
-var _calc = function(baseNum, nums, action) {
+var calcCore = function(baseNum, nums, action) {
   if (!nums || !nums.length) return null;
 
   if (baseNum || baseNum === 0) {
@@ -22,33 +22,33 @@ var _calc = function(baseNum, nums, action) {
     return getFloatLength(num);
   });
 
-  return _calc[action](nums, floatLengths);
+  return calcCore[action](nums, floatLengths);
 };
 
-_calc.plus = function(nums, floatLengths) {
+calcCore.plus = function(nums, floatLengths) {
   var maxFloatLength = Math.max.apply(null, floatLengths)
   var times = maxFloatLength > 0 ? Math.pow(10, maxFloatLength) : 1;
 
   var result = nums.reduce(function(curResult, curNum, index) {
-    return curResult += _calc.multiply([curNum, times], [floatLengths[index], 0]);
+    return curResult += calcCore.multiply([curNum, times], [floatLengths[index], 0]);
   }, 0);
 
   return result / times;
 };
 
-_calc.minus = function(nums, floatLengths) {
+calcCore.minus = function(nums, floatLengths) {
   var maxFloatLength = Math.max.apply(null, floatLengths)
   var times = maxFloatLength > 0 ? Math.pow(10, maxFloatLength) : 1;
-  var result = _calc.multiply([nums[0], times], [floatLengths[0], 0]);
+  var result = calcCore.multiply([nums[0], times], [floatLengths[0], 0]);
 
   for(var i = 1, len = nums.length; i < len; i++) {
-    result -= _calc.multiply([nums[i], times], [floatLengths[i], 0]);
+    result -= calcCore.multiply([nums[i], times], [floatLengths[i], 0]);
   }
 
   return result / times;
 };
 
-_calc.multiply = function(nums, floatLengths) {
+calcCore.multiply = function(nums, floatLengths) {
   var times = 1;
 
   var result = nums.reduce(function(curResult, curNum, index) {
@@ -59,8 +59,8 @@ _calc.multiply = function(nums, floatLengths) {
   return result / times;
 };
 
-_calc.divide = function(nums, floatLengths) {
-  var denominator = _calc.multiply(nums.slice(1), floatLengths.slice(1));
+calcCore.divide = function(nums, floatLengths) {
+  var denominator = calcCore.multiply(nums.slice(1), floatLengths.slice(1));
 
   var numerator = parseInt(('' + nums[0]).replace('.', ''), 10);
   var numeratorTimes = Math.pow(10, floatLengths[0]);
@@ -68,7 +68,7 @@ _calc.divide = function(nums, floatLengths) {
   var firstResult = numerator / denominator;
   var secondResult = 1 / numeratorTimes;
 
-  return _calc.multiply(
+  return calcCore.multiply(
     [firstResult, secondResult],
     [getFloatLength(firstResult), getFloatLength(secondResult)]
   );
@@ -81,22 +81,22 @@ var AccCalc = function() {
 
 // 链式调用
 AccCalc.prototype.plus = function() {
-  this._value = _calc(this._value, Array.prototype.slice.apply(arguments), 'plus');
+  this._value = calcCore(this._value, Array.prototype.slice.apply(arguments), 'plus');
   return this;
 };
 
 AccCalc.prototype.minus = function() {
-  this._value = _calc(this._value, Array.prototype.slice.apply(arguments), 'minus');
+  this._value = calcCore(this._value, Array.prototype.slice.apply(arguments), 'minus');
   return this;
 };
 
 AccCalc.prototype.multiply = function() {
-  this._value = _calc(this._value, Array.prototype.slice.apply(arguments), 'multiply');
+  this._value = calcCore(this._value, Array.prototype.slice.apply(arguments), 'multiply');
   return this;
 };
 
 AccCalc.prototype.divide = function(num1) {
-  this._value = _calc(this._value, Array.prototype.slice.apply(arguments), 'divide');
+  this._value = calcCore(this._value, Array.prototype.slice.apply(arguments), 'divide');
   return this;
 };
 
@@ -114,17 +114,19 @@ AccCalc.chain = function() {
 
 // 非链式调用
 AccCalc.plus = function() {
-  return _calc(null, Array.prototype.slice.apply(arguments), 'plus');
+  return calcCore(null, Array.prototype.slice.apply(arguments), 'plus');
 };
 
 AccCalc.minus = function() {
-  return _calc(null, Array.prototype.slice.apply(arguments), 'minus');
+  return calcCore(null, Array.prototype.slice.apply(arguments), 'minus');
 };
 
 AccCalc.multiply = function() {
-  return _calc(null, Array.prototype.slice.apply(arguments), 'multiply');
+  return calcCore(null, Array.prototype.slice.apply(arguments), 'multiply');
 };
 
 AccCalc.divide = function() {
-  return _calc(null, Array.prototype.slice.apply(arguments), 'divide');
+  return calcCore(null, Array.prototype.slice.apply(arguments), 'divide');
 };
+
+module.exports = AccCalc;
